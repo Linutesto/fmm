@@ -1,6 +1,15 @@
 # FMM — Fractal Memory
 
+![status](https://img.shields.io/badge/status-v0.1.0-ff5fa2)
+![python](https://img.shields.io/badge/python-3.9%2B-3776ab)
+![torch](https://img.shields.io/badge/torch-optional-ee4c2c)
+![license](https://img.shields.io/badge/license-MIT-22c55e)
+
 > Memory that organizes itself, the way biological memory does.
+
+> 🧬 Extracted from the [**Fractal Neurons** / **QJSON Agents**](https://yandesbiens.com/projects/fractal-neurons/)
+> research by [Yan Desbiens](https://yandesbiens.com). Pairs naturally with
+> [`ufm`](https://github.com/Linutesto/ufm) for single-GPU agent/model stacks.
 
 A self-organizing, hierarchical memory for AI agents. Instead of a flat bag of
 vectors, FMM stores knowledge as a tree of nested contexts you can zoom into or
