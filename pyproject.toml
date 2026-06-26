@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fmm"
+version = "0.1.0"
+description = "Fractal Memory — a self-organizing, hierarchical memory for AI agents (tree store + torch semantic lattice)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Yan Desbiens" }]
+keywords = ["memory", "agents", "rag", "fractal", "retrieval", "hierarchical"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+torch = ["torch>=2.0"]
+
+[project.urls]
+Homepage = "https://yandesbiens.com"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fmm"]
