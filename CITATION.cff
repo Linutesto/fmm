@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use FMM in your research, please cite it as below."
+title: "FMM — Fractal Memory"
+abstract: >-
+  A self-organizing, hierarchical memory for AI agents: a dependency-free
+  topic-addressed tree store and an optional torch semantic lattice with cosine
+  retrieval. Extracted from the Fractal Neurons / QJSON Agents research program.
+type: software
+authors:
+  - family-names: Desbiens
+    given-names: Yan
+    affiliation: "Éthiqueia Québec inc."
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # add when available
+version: 0.1.0
+date-released: "2026-06-26"
+license: MIT
+url: "https://yandesbiens.com/projects/fractal-neurons/"
+repository-code: "https://github.com/Linutesto/fmm"
+keywords:
+  - ai-agents
+  - memory
+  - retrieval
+  - rag
+  - hierarchical
+  - pytorch
