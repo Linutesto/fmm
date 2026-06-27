@@ -5,7 +5,8 @@ A self-organizing, hierarchical memory for AI agents. Two flavours:
 
 - ``FractalMemory`` — a dependency-free, topic-addressed tree store.
 - ``FractalMemoryMatrix`` — a torch-backed semantic lattice with cosine
-  retrieval (requires ``torch``; imported lazily).
+  retrieval, topic-scoped paging, and a cheap centroid ``route`` (requires
+  ``torch``; imported lazily).
 
 Extracted from the Fractal Neurons / QJSON Agents research work by Yan Desbiens.
 """
@@ -13,7 +14,7 @@ Extracted from the Fractal Neurons / QJSON Agents research work by Yan Desbiens.
 from .tree import FractalMemory
 
 __all__ = ["FractalMemory", "FractalMemoryMatrix", "FMMNode"]
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 
 def __getattr__(name: str):

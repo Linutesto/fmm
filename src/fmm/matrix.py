@@ -6,6 +6,7 @@ retrieval pathway to a model so it can anchor to previously seen semantics.
 """
 
 import time
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
@@ -117,6 +118,84 @@ class FractalMemoryMatrix(nn.Module):
             node.update_access_time()
             results.append((node, sim.item()))
         return results
+
+    def topic_centroids(self, level: int = 1) -> Dict[Tuple[str, ...], torch.Tensor]:
+        """Mean (unit-norm) vector of every topic subtree at depth ``level``.
+
+        Each centroid summarizes one region of the fractal store — the node's own
+        cheap descriptor. Built from data already present (no training, no extra
+        passes), so it costs one mean per subtree at index time.
+        """
+        groups: Dict[Tuple[str, ...], List[torch.Tensor]] = defaultdict(list)
+        for nid, node in self.nodes.items():
+            key = node.topic[:level]
+            if len(key) < level:
+                continue  # node shallower than the routing level — can't address it
+            groups[key].append(self.node_vectors[nid])
+        return {k: F.normalize(torch.stack(v).mean(0), dim=0) for k, v in groups.items()}
+
+    def route(
+        self,
+        query_vector: torch.Tensor,
+        top_r: int = 1,
+        level: int = 1,
+        centroids: Optional[Dict[Tuple[str, ...], torch.Tensor]] = None,
+    ) -> List[Tuple[Tuple[str, ...], float]]:
+        """Pick the ``top_r`` topic subtrees a query most likely belongs to.
+
+        The cheap counterpart to :meth:`retrieve`: instead of scanning items, score
+        the query against the per-subtree centroids and return the best ``top_r``
+        topic prefixes (highest cosine first). Feed those prefixes back into
+        ``retrieve(query, topic_prefix=...)`` to search only the routed region.
+
+        Cost is ``O(n_subtrees x dim)`` — independent of how many items the store
+        holds. Pass precomputed ``centroids`` (from :meth:`topic_centroids`) to avoid
+        rebuilding them per call.
+        """
+        cents = centroids if centroids is not None else self.topic_centroids(level)
+        if not cents:
+            return []
+        keys = list(cents.keys())
+        mat = torch.stack([cents[k] for k in keys])
+        sims = F.cosine_similarity(query_vector, mat)
+        r = min(top_r, len(keys))
+        top = torch.topk(sims, r)
+        return [(keys[i], float(top.values[j])) for j, i in enumerate(top.indices.tolist())]
+
+    def route_and_retrieve(
+        self,
+        query_vector: torch.Tensor,
+        top_k: int = 5,
+        top_r: int = 1,
+        level: int = 1,
+        centroids: Optional[Dict[Tuple[str, ...], torch.Tensor]] = None,
+    ) -> List[Tuple[FMMNode, float]]:
+        """Route to the ``top_r`` best subtrees, then retrieve within their union.
+
+        End-to-end scoped retrieval with no oracle: the store decides *where* to look
+        (:meth:`route`) and then *what* to return (:meth:`retrieve`). For ``top_r > 1``
+        the candidate set is the union of the routed subtrees.
+        """
+        routed = self.route(query_vector, top_r=top_r, level=level, centroids=centroids)
+        if not routed:
+            return []
+        prefixes = [p for p, _ in routed]
+        cand = [
+            nid
+            for nid, node in self.nodes.items()
+            if any(node.topic[: len(p)] == p for p in prefixes)
+        ]
+        if not cand:
+            return []
+        vecs = torch.stack([self.node_vectors[c] for c in cand])
+        sims = F.cosine_similarity(query_vector, vecs)
+        top = torch.topk(sims, min(top_k, len(cand)))
+        out = []
+        for sim, idx in zip(top.values, top.indices.tolist()):
+            node = self.nodes[cand[idx]]
+            node.update_access_time()
+            out.append((node, float(sim)))
+        return out
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Placeholder: FMM has no traditional forward pass; passthrough for integration."""

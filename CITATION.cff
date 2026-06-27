@@ -11,7 +11,7 @@ authors:
     given-names: Yan
     affiliation: "Éthiqueia Québec inc."
     # orcid: "https://orcid.org/0000-0000-0000-0000"  # add when available
-version: 0.2.0
+version: 0.3.0
 date-released: "2026-06-27"
 license: MIT
 url: "https://yandesbiens.com/projects/fractal-neurons/"
