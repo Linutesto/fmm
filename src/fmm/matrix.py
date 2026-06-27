@@ -21,12 +21,14 @@ class FMMNode:
         semantic_vector: torch.Tensor,
         context_anchor: Optional[torch.Tensor] = None,
         parent_id: Optional[str] = None,
+        topic: Optional[Tuple[str, ...]] = None,
     ):
         self.id = str(torch.randint(0, 1000000000, (1,)).item())
         self.semantic_vector = semantic_vector  # [dim]
         self.context_anchor = context_anchor  # [dim], e.g. mean of creating input
         self.parent_id = parent_id
         self.children_ids: List[str] = []
+        self.topic: Tuple[str, ...] = tuple(topic) if topic else ()  # hierarchical address
         self.last_accessed: float = 0.0  # for entropy-adaptive refresh
         self.entropy: float = 0.0  # information entropy of content
 
@@ -56,12 +58,13 @@ class FractalMemoryMatrix(nn.Module):
         semantic_vector: torch.Tensor,
         context_anchor: Optional[torch.Tensor] = None,
         parent_id: Optional[str] = None,
+        topic: Optional[Tuple[str, ...]] = None,
     ) -> Optional[FMMNode]:
         if len(self.nodes) >= self.max_nodes:
             # Pruning strategy hook (e.g. LRU, lowest entropy). For now, refuse.
             return None
 
-        node = FMMNode(semantic_vector, context_anchor, parent_id)
+        node = FMMNode(semantic_vector, context_anchor, parent_id, topic=topic)
         self.nodes[node.id] = node
         self.node_vectors[node.id] = semantic_vector
 
@@ -77,19 +80,39 @@ class FractalMemoryMatrix(nn.Module):
     def get_semantic_vector(self, node_id: str) -> Optional[torch.Tensor]:
         return self.node_vectors.get(node_id)
 
-    def retrieve(self, query_vector: torch.Tensor, top_k: int = 5) -> List[Tuple[FMMNode, float]]:
-        """Retrieve the top_k most similar nodes by semantic-vector cosine similarity."""
+    def _candidate_ids(self, topic_prefix: Optional[Tuple[str, ...]]) -> List[str]:
+        if not topic_prefix:
+            return list(self.node_vectors.keys())
+        p = tuple(topic_prefix)
+        n = len(p)
+        return [nid for nid, node in self.nodes.items() if node.topic[:n] == p]
+
+    def retrieve(
+        self,
+        query_vector: torch.Tensor,
+        top_k: int = 5,
+        topic_prefix: Optional[Tuple[str, ...]] = None,
+    ) -> List[Tuple[FMMNode, float]]:
+        """Retrieve the top_k most similar nodes by cosine similarity.
+
+        If ``topic_prefix`` is given, only nodes whose hierarchical topic starts with
+        that prefix are considered — scoped ("paged") retrieval over the relevant
+        region of the fractal store, instead of a flat scan of everything.
+        """
         if not self.node_vectors:
             return []
 
-        all_vectors = torch.stack(list(self.node_vectors.values()))
+        cand = self._candidate_ids(topic_prefix)
+        if not cand:
+            return []
+
+        all_vectors = torch.stack([self.node_vectors[c] for c in cand])
         similarities = F.cosine_similarity(query_vector, all_vectors)
-        top_similarities, top_indices = torch.topk(similarities, min(top_k, len(self.node_vectors)))
+        top_similarities, top_indices = torch.topk(similarities, min(top_k, len(cand)))
 
         results = []
-        node_ids = list(self.node_vectors.keys())
         for sim, idx in zip(top_similarities, top_indices):
-            node_id = node_ids[idx]
+            node_id = cand[idx]
             node = self.nodes[node_id]
             node.update_access_time()
             results.append((node, sim.item()))

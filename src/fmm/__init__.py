@@ -13,7 +13,7 @@ Extracted from the Fractal Neurons / QJSON Agents research work by Yan Desbiens.
 from .tree import FractalMemory
 
 __all__ = ["FractalMemory", "FractalMemoryMatrix", "FMMNode"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 def __getattr__(name: str):

@@ -1,0 +1,139 @@
+{
+  "env": {
+    "torch": "2.10.0+cu128",
+    "device": "cpu",
+    "cpu_threads": 16,
+    "python": "3.14.5",
+    "platform": "Linux-7.0.12-101.fc43.x86_64-x86_64-with-glibc2.42",
+    "timestamp": "2026-06-27T03:55:47-0400",
+    "config": {
+      "dim": 128,
+      "n_domains": 16,
+      "n_sub": 8,
+      "eps": 0.45,
+      "qnoise": 0.35,
+      "queries": 200,
+      "repeats": 5,
+      "k": 5,
+      "seed": 1337
+    }
+  },
+  "correctness": {
+    "scoped_retrieve_respects_topic": true,
+    "scoped_b_count": 10
+  },
+  "results": [
+    {
+      "mode": "flat",
+      "n": 1920,
+      "scope_size": 1920,
+      "latency_ms": 0.0848,
+      "recall_at_k": 0.475
+    },
+    {
+      "mode": "scoped_domain",
+      "n": 1920,
+      "scope_size": 120,
+      "latency_ms": 0.0104,
+      "recall_at_k": 0.865
+    },
+    {
+      "mode": "scoped_leaf",
+      "n": 1920,
+      "scope_size": 15,
+      "latency_ms": 0.0037,
+      "recall_at_k": 0.985
+    },
+    {
+      "mode": "misrouted",
+      "n": 1920,
+      "scope_size": 120,
+      "latency_ms": 0.0103,
+      "recall_at_k": 0.0
+    },
+    {
+      "mode": "flat",
+      "n": 7936,
+      "scope_size": 7936,
+      "latency_ms": 0.3382,
+      "recall_at_k": 0.275
+    },
+    {
+      "mode": "scoped_domain",
+      "n": 7936,
+      "scope_size": 496,
+      "latency_ms": 0.0263,
+      "recall_at_k": 0.68
+    },
+    {
+      "mode": "scoped_leaf",
+      "n": 7936,
+      "scope_size": 62,
+      "latency_ms": 0.0085,
+      "recall_at_k": 0.895
+    },
+    {
+      "mode": "misrouted",
+      "n": 7936,
+      "scope_size": 496,
+      "latency_ms": 0.0261,
+      "recall_at_k": 0.0
+    },
+    {
+      "mode": "flat",
+      "n": 32000,
+      "scope_size": 32000,
+      "latency_ms": 1.3077,
+      "recall_at_k": 0.23
+    },
+    {
+      "mode": "scoped_domain",
+      "n": 32000,
+      "scope_size": 2000,
+      "latency_ms": 0.0937,
+      "recall_at_k": 0.515
+    },
+    {
+      "mode": "scoped_leaf",
+      "n": 32000,
+      "scope_size": 250,
+      "latency_ms": 0.0149,
+      "recall_at_k": 0.76
+    },
+    {
+      "mode": "misrouted",
+      "n": 32000,
+      "scope_size": 2000,
+      "latency_ms": 0.0931,
+      "recall_at_k": 0.0
+    },
+    {
+      "mode": "flat",
+      "n": 128000,
+      "scope_size": 128000,
+      "latency_ms": 8.3043,
+      "recall_at_k": 0.155
+    },
+    {
+      "mode": "scoped_domain",
+      "n": 128000,
+      "scope_size": 8000,
+      "latency_ms": 0.3535,
+      "recall_at_k": 0.365
+    },
+    {
+      "mode": "scoped_leaf",
+      "n": 128000,
+      "scope_size": 1000,
+      "latency_ms": 0.0506,
+      "recall_at_k": 0.58
+    },
+    {
+      "mode": "misrouted",
+      "n": 128000,
+      "scope_size": 8000,
+      "latency_ms": 0.3451,
+      "recall_at_k": 0.0
+    }
+  ]
+}

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fmm"
-version = "0.1.0"
+version = "0.2.0"
 description = "Fractal Memory — a self-organizing, hierarchical memory for AI agents (tree store + torch semantic lattice)."
 readme = "README.md"
 requires-python = ">=3.9"
